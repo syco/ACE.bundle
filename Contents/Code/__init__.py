@@ -31,18 +31,30 @@ def List(title, url):
   )
   html = HTTP.Request('https://www.reddit.com{}'.format(url)).content
   pattern = re.compile(r'((?:\[[^\[\]]+\]\s+)*)acestream:\/\/([0-z]{40})((?:\s+\[[^\[\]]+\])*)', re.IGNORECASE)
+  lang_0 = []
+  lang_1 = []
   for m in re.finditer(pattern, html):
     aceid = m.group(2)
     acedesc = m.group(1) + m.group(3) + '   [ ' + aceid + ' ]'
+    url = 'http://127.0.0.1:6878/ace/manifest.m3u8?id={}'.format(aceid),
     if re.search('\[(ar|croatian|es|esp|ger|german|kazakh|pl|portugal|pt|ru|spanish|ukrainian)\]', acedesc, re.IGNORECASE) == None:
-      #url = 'http://127.0.0.1:6878/ace/getstream?id={}'.format(aceid),
-      url = 'http://127.0.0.1:6878/ace/manifest.m3u8?id={}'.format(aceid),
-      oc.add(
+      lang_1.append(
         Show(
           url = url,
           title = acedesc
         )
       )
+    else:
+      lang_0.append(
+        Show(
+          url = url,
+          title = acedesc
+        )
+      )
+    for e in lang_0:
+      oc.add(e)
+    for e in lang_1:
+      oc.add(e)
   return oc
 
 
