@@ -35,10 +35,11 @@ def ArenavisionList(title):
     )
   )
   today = '{:%d/%m/%Y}'.format(datetime.utcnow())
+  tomorrow = '{:%d/%m/%Y}'.format(datetime.utcnow() + timedelta(days=1))
   html = HTML.ElementFromURL('http://arenavision.in/guide', '', {'Cookie': 'beget=begetok; expires=' + ('{:%a, %d %b %Y %H:%M:%S GMT}'.format(datetime.utcnow() + timedelta(seconds=19360000))) + '; path=/'})
   for item in html.xpath('//tr[count(./td)>=6]'):
     av_date = item.xpath('./td[1]/text()')[0].decode('utf-8')
-    if today != av_date:
+    if today != av_date and tomorrow !=av_date:
       continue
     av_time = item.xpath('./td[2]/text()')[0].decode('utf-8')
     av_sport = item.xpath('./td[3]/text()')[0].decode('utf-8')
@@ -55,7 +56,7 @@ def ArenavisionList(title):
           urls.append(tokens[1] + '!' + (html.xpath('//a[text()="World Cup ' + c[1:] + '"]')[0]).get('href'))
         else:
           urls.append(tokens[1] + '!' + (html.xpath('//a[text()="ArenaVision ' + c + '"]')[0]).get('href'))
-    title = av_time + ' | ' + av_sport + ' | ' + av_tournament + ' | ' + av_match + ' |' + av_langs
+    title = av_date + ' ' + av_time + ' | ' + av_sport + ' | ' + av_tournament + ' | ' + av_match + ' |' + av_langs
     oc.add(
       DirectoryObject(
         key = Callback(ArenavisionSubList, title = title, url = '|'.join(urls)),
