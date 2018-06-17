@@ -1,3 +1,5 @@
+from datetime import datetime, timedelta
+import json
 import re
 
 def Start():
@@ -8,24 +10,111 @@ def Start():
 @handler('/video/ace', 'ACE', thumb = 'logo.png', art = 'logo.png')
 def MainMenu():
   oc = ObjectContainer(title2 = 'ACE')
-  html = HTML.ElementFromURL('https://www.reddit.com/r/soccerstreams/')
-  for item in html.xpath('//a[.//*[contains(translate(text(), "ABCDEFGHJIKLMNOPQRSTUVWXYZ", "abcdefghjiklmnopqrstuvwxyz"), " vs")]]'):
-    title = item.xpath('./h2/text()')[0]
-    href = item.get('href');
+  oc.add(
+    DirectoryObject(
+      key = Callback(ArenavisionList, title = 'Arenavision'),
+      title = 'Arenavision'
+    )
+  )
+  oc.add(
+    DirectoryObject(
+      key = Callback(RedditList, title = 'Reddit/Soccerstreams'),
+      title = 'Reddit/Soccerstreams'
+    )
+  )
+  return oc
+
+
+@route('/video/ace/arenavisionlist')
+def ArenavisionList(title):
+  oc = ObjectContainer(title2 = title)
+  oc.add(
+    DirectoryObject(
+      key = Callback(ArenavisionList, title = title),
+      title = 'Refresh'
+    )
+  )
+  today = '{:%d/%m/%Y}'.format(datetime.utcnow())
+  html = HTML.ElementFromURL('http://arenavision.in/guide', '', {'Cookie': 'beget=begetok; expires=' + ('{:%a, %d %b %Y %H:%M:%S GMT}'.format(datetime.utcnow() + timedelta(seconds=19360000))) + '; path=/'})
+  for item in html.xpath('//tr[count(./td)>=6]'):
+    av_date = item.xpath('./td[1]/text()')[0].decode('utf-8')
+    if today != av_date:
+      continue
+    av_time = item.xpath('./td[2]/text()')[0].decode('utf-8')
+    av_sport = item.xpath('./td[3]/text()')[0].decode('utf-8')
+    av_tournament = item.xpath('./td[4]/text()')[0].decode('utf-8')
+    av_match = item.xpath('./td[5]/text()')[0].decode('utf-8')
+    av_langs = ''
+    urls = []
+    for t1 in item.xpath('./td[6]/text()'):
+      tokens = t1.split(' ')
+      av_langs = av_langs + ' ' + tokens[1]
+      for c in tokens[0].split('-'):
+        c = c.strip()
+        if c[0] == 'W':
+          urls.append(tokens[1] + '!' + (html.xpath('//a[text()="World Cup ' + c[1:] + '"]')[0]).get('href'))
+        else:
+          urls.append(tokens[1] + '!' + (html.xpath('//a[text()="ArenaVision ' + c + '"]')[0]).get('href'))
+    title = av_time + ' | ' + av_sport + ' | ' + av_tournament + ' | ' + av_match + ' |' + av_langs
     oc.add(
       DirectoryObject(
-        key = Callback(List, title = title, url = href),
+        key = Callback(ArenavisionSubList, title = title, url = '|'.join(urls)),
         title = title
       )
     )
   return oc
 
-@route('/video/ace/list')
-def List(title, url):
+@route('/video/ace/arenavisionsublist')
+def ArenavisionSubList(title, url):
   oc = ObjectContainer(title2 = title)
   oc.add(
     DirectoryObject(
-      key = Callback(List, title = title, url = url),
+      key = Callback(ArenavisionSubList, title = title, url = url),
+      title = 'Refresh'
+    )
+  )
+  pattern = re.compile(r'acestream:\/\/([0-z]{40})', re.IGNORECASE)
+  for r in url.split('|'):
+    t = r.split('!')
+    html = HTTP.Request(t[1]).content
+    for m in re.finditer(pattern, html):
+      Log(m.group(1))
+      oc.add(
+        Show(
+          url = 'http://127.0.0.1:6878/ace/manifest.m3u8?id={}'.format(m.group(1)),
+          title = t[0]
+        )
+      )
+  return oc
+
+
+@route('/video/ace/redditlist')
+def RedditList(title):
+  oc = ObjectContainer(title2 = title)
+  oc.add(
+    DirectoryObject(
+      key = Callback(RedditList, title = title),
+      title = 'Refresh'
+    )
+  )
+  html = HTML.ElementFromURL('https://www.reddit.com/r/soccerstreams/')
+  for item in html.xpath('//a[.//*[contains(translate(text(), "ABCDEFGHJIKLMNOPQRSTUVWXYZ", "abcdefghjiklmnopqrstuvwxyz"), " vs")]]'):
+    title = (item.xpath('./h2/text()')[0]).decode('utf-8')
+    href = item.get('href');
+    oc.add(
+      DirectoryObject(
+        key = Callback(RedditSubList, title = title, url = href),
+        title = title
+      )
+    )
+  return oc
+
+@route('/video/ace/redditsublist')
+def RedditSubList(title, url):
+  oc = ObjectContainer(title2 = title)
+  oc.add(
+    DirectoryObject(
+      key = Callback(RedditSubList, title = title, url = url),
       title = 'Refresh'
     )
   )
@@ -41,14 +130,14 @@ def List(title, url):
       lang_1.append(
         Show(
           url = url,
-          title = acedesc
+          title = acedesc.decode('utf-8')
         )
       )
     else:
       lang_0.append(
         Show(
           url = url,
-          title = acedesc
+          title = acedesc.decode('utf-8')
         )
       )
     for e in lang_0:
