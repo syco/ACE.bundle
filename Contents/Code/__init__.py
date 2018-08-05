@@ -59,7 +59,7 @@ def ListProviderStreams(title, action, url):
     jAce = item['ace'].decode('utf-8')
     oc.add(
       Show(
-        ace = 'http://127.0.0.1:6878/ace/manifest.m3u8?id=' + jAce,
+        ace = 'http://10.0.0.250:6878/ace/manifest.m3u8?id=' + jAce,
         title = jTitle
       )
     )
