@@ -8,6 +8,7 @@ def Start():
 
 @handler('/video/ace', 'ACE', thumb = 'logo.png', art = 'logo.png')
 def MainMenu():
+  Log('ZX_COMMAND_START_ACESTREAMENGINE')
   oc = ObjectContainer(title2 = 'ACE')
   json = JSON.ObjectFromURL('http://syco.netsons.org/scrapers/acestream/index.php?action=getProviders')
   for item in json:
@@ -67,7 +68,7 @@ def ListProviderStreams(title, action, url):
 
 
 @route('/video/ace/show', include_container = bool)
-def Show(ace, title, include_container = False, **kwargs):
+def Show(ace, title, include_container = False, **args):
   vco = VideoClipObject(
     key = Callback(Show, ace = ace, title = title, include_container = True),
     rating_key = ace,
@@ -95,6 +96,6 @@ def Show(ace, title, include_container = False, **kwargs):
 
 @indirect
 @route('/video/ace/play.m3u8')
-def Play(ace, **kwargs):
+def Play(ace, **args):
   Log(' --> Final stream ace: %s' % (ace))
   return IndirectResponse(VideoClipObject, key = ace)
