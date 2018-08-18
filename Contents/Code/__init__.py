@@ -10,16 +10,18 @@ def Start():
 def MainMenu():
   Log('ZX_COMMAND_START_ACESTREAMENGINE')
   oc = ObjectContainer(title2 = 'ACE')
+  Log('http://syco.netsons.org/scrapers/acestream/index.php?action=getProviders')
   json = JSON.ObjectFromURL('http://syco.netsons.org/scrapers/acestream/index.php?action=getProviders')
   for item in json:
-    jTitle = item['title'].decode('utf-8')
-    jAction = item['action'].decode('utf-8')
-    oc.add(
-      DirectoryObject(
-        key = Callback(ListProvider, title = jTitle, action = jAction),
-        title = jTitle
+    if item != None and item['title'] != None and item['action'] != None:
+      jTitle = item['title'].decode('utf-8')
+      jAction = item['action'].decode('utf-8')
+      oc.add(
+        DirectoryObject(
+          key = Callback(ListProvider, title = jTitle, action = jAction),
+          title = jTitle
+        )
       )
-    )
   return oc
 
 
@@ -32,17 +34,19 @@ def ListProvider(title, action):
       title = 'Refresh'
     )
   )
+  Log('http://syco.netsons.org/scrapers/acestream/index.php?action=' + action)
   json = JSON.ObjectFromURL('http://syco.netsons.org/scrapers/acestream/index.php?action=' + action)
   for item in json:
-    jTitle = item['title'].decode('utf-8')
-    jAction = item['action'].decode('utf-8')
-    jUrl = item['url'].decode('utf-8')
-    oc.add(
-      DirectoryObject(
-        key = Callback(ListProviderStreams, title = jTitle, action = jAction, url = jUrl),
-        title = jTitle
+    if item != None and item['title'] != None and item['action'] != None and item['url'] != None:
+      jTitle = item['title'].decode('utf-8')
+      jAction = item['action'].decode('utf-8')
+      jUrl = item['url'].decode('utf-8')
+      oc.add(
+        DirectoryObject(
+          key = Callback(ListProviderStreams, title = jTitle, action = jAction, url = jUrl),
+          title = jTitle
+        )
       )
-    )
   return oc
 
 @route('/video/ace/listproviderstreams')
@@ -54,16 +58,18 @@ def ListProviderStreams(title, action, url):
       title = 'Refresh'
     )
   )
+  Log('http://syco.netsons.org/scrapers/acestream/index.php?action=' + action + '&url=' + urllib.quote_plus(url))
   json = JSON.ObjectFromURL('http://syco.netsons.org/scrapers/acestream/index.php?action=' + action + '&url=' + urllib.quote_plus(url))
   for item in json:
-    jTitle = item['title'].decode('utf-8')
-    jAce = item['ace'].decode('utf-8')
-    oc.add(
-      Show(
-        ace = 'http://10.0.0.250:6878/ace/manifest.m3u8?id=' + jAce,
-        title = jTitle
+    if item != None and item['title'] != None and item['ace'] != None:
+      jTitle = item['title'].decode('utf-8')
+      jAce = item['ace'].decode('utf-8')
+      oc.add(
+        Show(
+          ace = 'http://10.0.0.250:6878/ace/manifest.m3u8?id=' + jAce,
+          title = jTitle
+        )
       )
-    )
   return oc
 
 
