@@ -6,6 +6,7 @@ def Start():
   ObjectContainer.title1 = 'ACE'
   HTTP.Headers['User-Agent'] = 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_10_5) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/45.0.2454.85 Safari/537.36'
   HTTP.CacheTime = 0
+  Log('Ace host: {}, Ace port: {}'.format(Prefs['ace_host'], Prefs['ace_port']))
 
 @handler('/video/ace', 'ACE', thumb = 'logo.png', art = 'logo.png')
 def MainMenu():
@@ -82,7 +83,7 @@ def ArenavisionSubList(title, url):
       Log(m.group(1))
       oc.add(
         Show(
-          url = 'http://127.0.0.1:6878/ace/manifest.m3u8?id={}'.format(m.group(1)),
+          url = 'http://{}:{}/ace/manifest.m3u8?id={}'.format(Prefs['ace_host'], Prefs['ace_port'], m.group(1)),
           title = t[0]
         )
       )
@@ -126,7 +127,7 @@ def RedditSubList(title, url):
   for m in re.finditer(pattern, html):
     aceid = m.group(2)
     acedesc = m.group(1) + m.group(3) + '   [ ' + aceid + ' ]'
-    url = 'http://127.0.0.1:6878/ace/manifest.m3u8?id={}'.format(aceid),
+    url = 'http://{}:{}/ace/manifest.m3u8?id={}'.format(Prefs['ace_host'], Prefs['ace_port'], aceid),
     if re.search('\[(ar|croatian|es|esp|ger|german|kazakh|pl|portugal|pt|ru|spanish|ukrainian)\]', acedesc, re.IGNORECASE) == None:
       lang_1.append(
         Show(

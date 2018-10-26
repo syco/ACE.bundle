@@ -1,0 +1,14 @@
+[
+    {
+        "id":       "ace_host",
+        "label":    "Hostname for the acestream application",
+        "type":     "text",
+        "default":  "127.0.0.1"
+    },
+    {
+        "id":       "ace_port",
+        "label":    "Port for the acestream application",
+        "type":     "text",
+        "default":  "6878"
+    }
+]
