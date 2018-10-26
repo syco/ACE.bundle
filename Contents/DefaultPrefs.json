@@ -10,5 +10,29 @@
         "label":    "Port for the acestream application",
         "type":     "text",
         "default":  "6878"
+    },
+    {
+        "id":       "show_arenavision",
+        "label":    "Load arenavision links",
+        "type":     "bool",
+        "default":  true
+    },
+    {
+        "id":       "show_reddit_soccer",
+        "label":    "Load reddit soccer links",
+        "type":     "bool",
+        "default":  true
+    },
+    {
+        "id":       "show_reddit_motorsports",
+        "label":    "Load reddit motorsports links",
+        "type":     "bool",
+        "default":  true
+    },
+    {
+        "id":       "show_reddit_mma",
+        "label":    "Load reddit mma links",
+        "type":     "bool",
+        "default":  true
     }
 ]
