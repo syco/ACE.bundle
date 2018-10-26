@@ -54,9 +54,9 @@ def ArenavisionList(title):
       for c in tokens[0].split('-'):
         c = c.strip()
         if c[0] == 'W':
-          urls.append(tokens[1] + '!' + (html.xpath('//a[text()="World Cup ' + c[1:] + '"]')[0]).get('href'))
+          urls.append(tokens[1] + ' ' + c + '!' + (html.xpath('//a[text()="World Cup ' + c[1:] + '"]')[0]).get('href'))
         else:
-          urls.append(tokens[1] + '!' + (html.xpath('//a[text()="ArenaVision ' + c + '"]')[0]).get('href'))
+          urls.append(tokens[1] + ' ' + c + '!' + (html.xpath('//a[text()="ArenaVision ' + c + '"]')[0]).get('href'))
     title = av_date + ' ' + av_time + ' | ' + av_sport + ' | ' + av_tournament + ' | ' + av_match + ' |' + av_langs
     oc.add(
       DirectoryObject(
@@ -78,12 +78,13 @@ def ArenavisionSubList(title, url):
   pattern = re.compile(r'acestream:\/\/([0-z]{40})', re.IGNORECASE)
   for r in url.split('|'):
     t = r.split('!')
-    html = HTTP.Request(t[1]).content
+    html = HTTP.Request(t[1], '', {'Cookie': 'beget=begetok; expires=' + ('{:%a, %d %b %Y %H:%M:%S GMT}'.format(datetime.utcnow() + timedelta(seconds=19360000))) + '; path=/'}).content
     for m in re.finditer(pattern, html):
-      Log(m.group(1))
+      aurl = 'http://{}:{}/ace/manifest.m3u8?id={}'.format(Prefs['ace_host'], Prefs['ace_port'], m.group(1))
+      Log(aurl)
       oc.add(
         Show(
-          url = 'http://{}:{}/ace/manifest.m3u8?id={}'.format(Prefs['ace_host'], Prefs['ace_port'], m.group(1)),
+          url = aurl,
           title = t[0]
         )
       )
@@ -127,18 +128,19 @@ def RedditSubList(title, url):
   for m in re.finditer(pattern, html):
     aceid = m.group(2)
     acedesc = m.group(1) + m.group(3) + '   [ ' + aceid + ' ]'
-    url = 'http://{}:{}/ace/manifest.m3u8?id={}'.format(Prefs['ace_host'], Prefs['ace_port'], aceid),
+    aurl = 'http://{}:{}/ace/manifest.m3u8?id={}'.format(Prefs['ace_host'], Prefs['ace_port'], aceid)
+    Log(aurl)
     if re.search('\[(ar|croatian|es|esp|ger|german|kazakh|pl|portugal|pt|ru|spanish|ukrainian)\]', acedesc, re.IGNORECASE) == None:
       lang_1.append(
         Show(
-          url = url,
+          url = aurl,
           title = acedesc.decode('utf-8')
         )
       )
     else:
       lang_0.append(
         Show(
-          url = url,
+          url = aurl,
           title = acedesc.decode('utf-8')
         )
       )
