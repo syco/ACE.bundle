@@ -32,6 +32,13 @@ def MainMenu():
         title = 'Reddit/MotorSports'
       )
     )
+  if (Prefs['show_reddit_nfl']):
+    oc.add(
+      DirectoryObject(
+        key = Callback(RedditNFLList, title = 'Reddit/NFL'),
+        title = 'Reddit/NFL'
+      )
+    )
   if (Prefs['show_reddit_mma']):
     oc.add(
       DirectoryObject(
@@ -194,6 +201,66 @@ def RedditMotorSportsSubList(title, url):
   oc.add(
     DirectoryObject(
       key = Callback(RedditMotorSportsSubList, title = title, url = url),
+      title = 'Refresh'
+    )
+  )
+  html = HTTP.Request('https://www.reddit.com{}'.format(url)).content
+  pattern = re.compile(r'((?:\[[^\[\]]+\]\s+)*)acestream:\/\/([0-z]{40})((?:\s+\[[^\[\]]+\])*)', re.IGNORECASE)
+  lang_0 = []
+  lang_1 = []
+  for m in re.finditer(pattern, html):
+    aceid = m.group(2)
+    acedesc = m.group(1) + m.group(3) + '   [ ' + aceid + ' ]'
+    aurl = 'http://{}:{}/ace/manifest.m3u8?id={}'.format(Prefs['ace_host'], Prefs['ace_port'], aceid)
+    Log(aurl)
+    if re.search('\[(ar|croatian|es|esp|ger|german|kazakh|pl|portugal|pt|ru|spanish|ukrainian)\]', acedesc, re.IGNORECASE) == None:
+      lang_1.append(
+        Show(
+          url = aurl,
+          title = acedesc.decode('utf-8')
+        )
+      )
+    else:
+      lang_0.append(
+        Show(
+          url = aurl,
+          title = acedesc.decode('utf-8')
+        )
+      )
+    for e in lang_0:
+      oc.add(e)
+    for e in lang_1:
+      oc.add(e)
+  return oc
+
+
+@route('/video/ace/redditnflstreamslist')
+def RedditNFLList(title):
+  oc = ObjectContainer(title2 = title)
+  oc.add(
+    DirectoryObject(
+      key = Callback(RedditNFLList, title = title),
+      title = 'Refresh'
+    )
+  )
+  html = HTML.ElementFromURL('https://www.reddit.com/r/nflstreams/')
+  for item in html.xpath('//a[.//*[contains(translate(text(), "ABCDEFGHJIKLMNOPQRSTUVWXYZ", "abcdefghjiklmnopqrstuvwxyz"), " @")]]'):
+    title = (item.xpath('./h2/text()')[0]).decode('utf-8')
+    href = item.get('href');
+    oc.add(
+      DirectoryObject(
+        key = Callback(RedditNFLSubList, title = title, url = href),
+        title = title
+      )
+    )
+  return oc
+
+@route('/video/ace/redditnflstreamssublist')
+def RedditNFLSubList(title, url):
+  oc = ObjectContainer(title2 = title)
+  oc.add(
+    DirectoryObject(
+      key = Callback(RedditNFLSubList, title = title, url = url),
       title = 'Refresh'
     )
   )
