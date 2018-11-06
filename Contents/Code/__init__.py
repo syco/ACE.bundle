@@ -18,18 +18,11 @@ def MainMenu():
         title = 'Arenavision'
       )
     )
-  if (Prefs['show_reddit_soccer']):
+  if (Prefs['show_reddit_nba']):
     oc.add(
       DirectoryObject(
-        key = Callback(RedditSoccerList, title = 'Reddit/Soccer'),
-        title = 'Reddit/Soccer'
-      )
-    )
-  if (Prefs['show_reddit_motorsports']):
-    oc.add(
-      DirectoryObject(
-        key = Callback(RedditMotorSportsList, title = 'Reddit/MotorSports'),
-        title = 'Reddit/MotorSports'
+        key = Callback(RedditNBAList, title = 'Reddit/NBA'),
+        title = 'Reddit/NBA'
       )
     )
   if (Prefs['show_reddit_nfl']):
@@ -44,6 +37,20 @@ def MainMenu():
       DirectoryObject(
         key = Callback(RedditMMAList, title = 'Reddit/MMA'),
         title = 'Reddit/MMA'
+      )
+    )
+  if (Prefs['show_reddit_motorsports']):
+    oc.add(
+      DirectoryObject(
+        key = Callback(RedditMotorSportsList, title = 'Reddit/MotorSports'),
+        title = 'Reddit/MotorSports'
+      )
+    )
+  if (Prefs['show_reddit_soccer']):
+    oc.add(
+      DirectoryObject(
+        key = Callback(RedditSoccerList, title = 'Reddit/Soccer'),
+        title = 'Reddit/Soccer'
       )
     )
   return oc
@@ -114,33 +121,24 @@ def ArenavisionSubList(title, url):
   return oc
 
 
-@route('/video/ace/redditsoccerlist')
-def RedditSoccerList(title):
-  oc = ObjectContainer(title2 = title)
-  oc.add(
-    DirectoryObject(
-      key = Callback(RedditSoccerList, title = title),
-      title = 'Refresh'
-    )
-  )
-  html = HTML.ElementFromURL('https://www.reddit.com/r/soccerstreams/')
-  for item in html.xpath('//a[.//*[contains(translate(text(), "ABCDEFGHJIKLMNOPQRSTUVWXYZ", "abcdefghjiklmnopqrstuvwxyz"), " vs")]]'):
+def getRedditLinks(oc, url, selector):
+  html = HTML.ElementFromURL(url)
+  for item in html.xpath('//a[.//*[contains(translate(text(), "ABCDEFGHJIKLMNOPQRSTUVWXYZ", "abcdefghjiklmnopqrstuvwxyz"), "' + selector + '")]]'):
     title = (item.xpath('./h2/text()')[0]).decode('utf-8')
     href = item.get('href');
     oc.add(
       DirectoryObject(
-        key = Callback(RedditSoccerSubList, title = title, url = href),
+        key = Callback(RedditSubList, title = title, url = href),
         title = title
       )
     )
-  return oc
 
-@route('/video/ace/redditsoccersublist')
-def RedditSoccerSubList(title, url):
+@route('/video/ace/redditsublist')
+def RedditSubList(title, url):
   oc = ObjectContainer(title2 = title)
   oc.add(
     DirectoryObject(
-      key = Callback(RedditSoccerSubList, title = title, url = url),
+      key = Callback(RedditSubList, title = title, url = url),
       title = 'Refresh'
     )
   )
@@ -173,6 +171,42 @@ def RedditSoccerSubList(title, url):
       oc.add(e)
   return oc
 
+
+@route('/video/ace/redditnbalist')
+def RedditNBAList(title):
+  oc = ObjectContainer(title2 = title)
+  oc.add(
+    DirectoryObject(
+      key = Callback(RedditNBAList, title = title),
+      title = 'Refresh'
+    )
+  )
+  getRedditLinks(oc, 'https://www.reddit.com/r/nbastreams/', ' vs')
+  return oc
+
+@route('/video/ace/redditnfllist')
+def RedditNFLList(title):
+  oc = ObjectContainer(title2 = title)
+  oc.add(
+    DirectoryObject(
+      key = Callback(RedditNFLList, title = title),
+      title = 'Refresh'
+    )
+  )
+  getRedditLinks(oc, 'https://www.reddit.com/r/nflstreams/', ' @')
+  return oc
+
+@route('/video/ace/redditmmalist')
+def RedditMMAList(title):
+  oc = ObjectContainer(title2 = title)
+  oc.add(
+    DirectoryObject(
+      key = Callback(RedditMMAList, title = title),
+      title = 'Refresh'
+    )
+  )
+  getRedditLinks(oc, 'https://www.reddit.com/r/MMAStreams/', ' vs')
+  return oc
 
 @route('/video/ace/redditmotorsportslist')
 def RedditMotorSportsList(title):
@@ -183,174 +217,19 @@ def RedditMotorSportsList(title):
       title = 'Refresh'
     )
   )
-  html = HTML.ElementFromURL('https://www.reddit.com/r/motorsportsstreams/')
-  for item in html.xpath('//a[.//*[contains(translate(text(), "ABCDEFGHJIKLMNOPQRSTUVWXYZ", "abcdefghjiklmnopqrstuvwxyz"), " utc")]]'):
-    title = (item.xpath('./h2/text()')[0]).decode('utf-8')
-    href = item.get('href');
-    oc.add(
-      DirectoryObject(
-        key = Callback(RedditMotorSportsSubList, title = title, url = href),
-        title = title
-      )
-    )
+  getRedditLinks(oc, 'https://www.reddit.com/r/motorsportsstreams/', ' utc')
   return oc
 
-@route('/video/ace/redditmotorsportssublist')
-def RedditMotorSportsSubList(title, url):
+@route('/video/ace/redditsoccerlist')
+def RedditSoccerList(title):
   oc = ObjectContainer(title2 = title)
   oc.add(
     DirectoryObject(
-      key = Callback(RedditMotorSportsSubList, title = title, url = url),
+      key = Callback(RedditSoccerList, title = title),
       title = 'Refresh'
     )
   )
-  html = HTTP.Request('https://www.reddit.com{}'.format(url)).content
-  pattern = re.compile(r'((?:\[[^\[\]]+\]\s+)*)acestream:\/\/([0-z]{40})((?:\s+\[[^\[\]]+\])*)', re.IGNORECASE)
-  lang_0 = []
-  lang_1 = []
-  for m in re.finditer(pattern, html):
-    aceid = m.group(2)
-    acedesc = m.group(1) + m.group(3) + '   [ ' + aceid + ' ]'
-    aurl = 'http://{}:{}/ace/manifest.m3u8?id={}'.format(Prefs['ace_host'], Prefs['ace_port'], aceid)
-    Log(aurl)
-    if re.search('\[(ar|croatian|es|esp|ger|german|kazakh|pl|portugal|pt|ru|spanish|ukrainian)\]', acedesc, re.IGNORECASE) == None:
-      lang_1.append(
-        Show(
-          url = aurl,
-          title = acedesc.decode('utf-8')
-        )
-      )
-    else:
-      lang_0.append(
-        Show(
-          url = aurl,
-          title = acedesc.decode('utf-8')
-        )
-      )
-    for e in lang_0:
-      oc.add(e)
-    for e in lang_1:
-      oc.add(e)
-  return oc
-
-
-@route('/video/ace/redditnflstreamslist')
-def RedditNFLList(title):
-  oc = ObjectContainer(title2 = title)
-  oc.add(
-    DirectoryObject(
-      key = Callback(RedditNFLList, title = title),
-      title = 'Refresh'
-    )
-  )
-  html = HTML.ElementFromURL('https://www.reddit.com/r/nflstreams/')
-  for item in html.xpath('//a[.//*[contains(translate(text(), "ABCDEFGHJIKLMNOPQRSTUVWXYZ", "abcdefghjiklmnopqrstuvwxyz"), " @")]]'):
-    title = (item.xpath('./h2/text()')[0]).decode('utf-8')
-    href = item.get('href');
-    oc.add(
-      DirectoryObject(
-        key = Callback(RedditNFLSubList, title = title, url = href),
-        title = title
-      )
-    )
-  return oc
-
-@route('/video/ace/redditnflstreamssublist')
-def RedditNFLSubList(title, url):
-  oc = ObjectContainer(title2 = title)
-  oc.add(
-    DirectoryObject(
-      key = Callback(RedditNFLSubList, title = title, url = url),
-      title = 'Refresh'
-    )
-  )
-  html = HTTP.Request('https://www.reddit.com{}'.format(url)).content
-  pattern = re.compile(r'((?:\[[^\[\]]+\]\s+)*)acestream:\/\/([0-z]{40})((?:\s+\[[^\[\]]+\])*)', re.IGNORECASE)
-  lang_0 = []
-  lang_1 = []
-  for m in re.finditer(pattern, html):
-    aceid = m.group(2)
-    acedesc = m.group(1) + m.group(3) + '   [ ' + aceid + ' ]'
-    aurl = 'http://{}:{}/ace/manifest.m3u8?id={}'.format(Prefs['ace_host'], Prefs['ace_port'], aceid)
-    Log(aurl)
-    if re.search('\[(ar|croatian|es|esp|ger|german|kazakh|pl|portugal|pt|ru|spanish|ukrainian)\]', acedesc, re.IGNORECASE) == None:
-      lang_1.append(
-        Show(
-          url = aurl,
-          title = acedesc.decode('utf-8')
-        )
-      )
-    else:
-      lang_0.append(
-        Show(
-          url = aurl,
-          title = acedesc.decode('utf-8')
-        )
-      )
-    for e in lang_0:
-      oc.add(e)
-    for e in lang_1:
-      oc.add(e)
-  return oc
-
-
-@route('/video/ace/redditmmastreamslist')
-def RedditMMAList(title):
-  oc = ObjectContainer(title2 = title)
-  oc.add(
-    DirectoryObject(
-      key = Callback(RedditMMAList, title = title),
-      title = 'Refresh'
-    )
-  )
-  html = HTML.ElementFromURL('https://www.reddit.com/r/MMAStreams/')
-  for item in html.xpath('//a[.//*[contains(translate(text(), "ABCDEFGHJIKLMNOPQRSTUVWXYZ", "abcdefghjiklmnopqrstuvwxyz"), " vs")]]'):
-    title = (item.xpath('./h2/text()')[0]).decode('utf-8')
-    href = item.get('href');
-    oc.add(
-      DirectoryObject(
-        key = Callback(RedditMMASubList, title = title, url = href),
-        title = title
-      )
-    )
-  return oc
-
-@route('/video/ace/redditmmastreamssublist')
-def RedditMMASubList(title, url):
-  oc = ObjectContainer(title2 = title)
-  oc.add(
-    DirectoryObject(
-      key = Callback(RedditMMASubList, title = title, url = url),
-      title = 'Refresh'
-    )
-  )
-  html = HTTP.Request('https://www.reddit.com{}'.format(url)).content
-  pattern = re.compile(r'((?:\[[^\[\]]+\]\s+)*)acestream:\/\/([0-z]{40})((?:\s+\[[^\[\]]+\])*)', re.IGNORECASE)
-  lang_0 = []
-  lang_1 = []
-  for m in re.finditer(pattern, html):
-    aceid = m.group(2)
-    acedesc = m.group(1) + m.group(3) + '   [ ' + aceid + ' ]'
-    aurl = 'http://{}:{}/ace/manifest.m3u8?id={}'.format(Prefs['ace_host'], Prefs['ace_port'], aceid)
-    Log(aurl)
-    if re.search('\[(ar|croatian|es|esp|ger|german|kazakh|pl|portugal|pt|ru|spanish|ukrainian)\]', acedesc, re.IGNORECASE) == None:
-      lang_1.append(
-        Show(
-          url = aurl,
-          title = acedesc.decode('utf-8')
-        )
-      )
-    else:
-      lang_0.append(
-        Show(
-          url = aurl,
-          title = acedesc.decode('utf-8')
-        )
-      )
-    for e in lang_0:
-      oc.add(e)
-    for e in lang_1:
-      oc.add(e)
+  getRedditLinks(oc, 'https://www.reddit.com/r/soccerstreams/', ' vs')
   return oc
 
 

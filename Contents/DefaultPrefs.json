@@ -18,8 +18,8 @@
         "default":  true
     },
     {
-        "id":       "show_reddit_soccer",
-        "label":    "Load reddit soccer links",
+        "id":       "show_reddit_mma",
+        "label":    "Load reddit mma links",
         "type":     "bool",
         "default":  true
     },
@@ -30,14 +30,20 @@
         "default":  true
     },
     {
+        "id":       "show_reddit_nba",
+        "label":    "Load reddit nba links",
+        "type":     "bool",
+        "default":  true
+    },
+    {
         "id":       "show_reddit_nfl",
         "label":    "Load reddit nfl links",
         "type":     "bool",
         "default":  true
     },
     {
-        "id":       "show_reddit_mma",
-        "label":    "Load reddit mma links",
+        "id":       "show_reddit_soccer",
+        "label":    "Load reddit soccer links",
         "type":     "bool",
         "default":  true
     }
