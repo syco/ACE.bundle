@@ -181,7 +181,7 @@ def RedditNBAList(title):
       title = 'Refresh'
     )
   )
-  getRedditLinks(oc, 'https://www.reddit.com/r/nbastreams/', ' vs')
+  getRedditLinks(oc, 'https://www.reddit.com/r/nbastreams/', ' @')
   return oc
 
 @route('/video/ace/redditnfllist')
