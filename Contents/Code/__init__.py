@@ -122,16 +122,32 @@ def ArenavisionSubList(title, url):
 
 
 def getRedditLinks(oc, url, selector):
-  html = HTML.ElementFromURL(url)
-  for item in html.xpath('//a[.//*[contains(translate(text(), "ABCDEFGHJIKLMNOPQRSTUVWXYZ", "abcdefghjiklmnopqrstuvwxyz"), "' + selector + '")]]'):
-    title = (item.xpath('./h2/text()')[0]).decode('utf-8')
-    href = item.get('href');
-    oc.add(
-      DirectoryObject(
-        key = Callback(RedditSubList, title = title, url = href),
-        title = title
+  html = HTTP.Request(url).content
+  js = json.loads(html)
+  for t3 in js["data"]["children"]:
+    title = t3["data"]["title"]
+    if title.lower().find(selector) != -1:
+      title2 = "{}, by {}".format(title, t3["data"]["author"])
+      url2 = t3["data"]["url"]
+      oc.add(
+        DirectoryObject(
+          key = Callback(RedditSubList, title = title2, url = url2),
+          title = title2
+        )
       )
-    )
+
+
+def findAllData(js, ks):
+  arr = []
+  if isinstance(js, dict):
+    for k in js:
+      if k == ks and "body" in js[k]:
+        arr.append(js[k])
+      arr.extend(findAllData(js[k], ks))
+  elif isinstance(js, list):
+    for sjs in js:
+      arr.extend(findAllData(sjs, ks))
+  return arr
 
 @route('/video/ace/redditsublist')
 def RedditSubList(title, url):
@@ -142,33 +158,36 @@ def RedditSubList(title, url):
       title = 'Refresh'
     )
   )
-  html = HTTP.Request('https://www.reddit.com{}'.format(url)).content
   pattern = re.compile(r'((?:\[[^\[\]]+\]\s+)*)acestream:\/\/([0-z]{40})((?:\s+\[[^\[\]]+\])*)', re.IGNORECASE)
   lang_0 = []
   lang_1 = []
-  for m in re.finditer(pattern, html):
-    aceid = m.group(2)
-    acedesc = m.group(1) + m.group(3) + '   [ ' + aceid + ' ]'
-    aurl = 'http://{}:{}/ace/manifest.m3u8?id={}'.format(Prefs['ace_host'], Prefs['ace_port'], aceid)
-    Log(aurl)
-    if re.search('\[(ar|croatian|es|esp|ger|german|kazakh|pl|portugal|pt|ru|spanish|ukrainian)\]', acedesc, re.IGNORECASE) == None:
-      lang_1.append(
-        Show(
-          url = aurl,
-          title = acedesc.decode('utf-8')
+  html = HTTP.Request("{}.json".format(url[:-1])).content
+  js = json.loads(html)
+  arr = findAllData(js, "data")
+  for t3 in arr:
+    for m in re.finditer(pattern, t3["body"]):
+      aceid = m.group(2)
+      acedesc = "{}{} [{}] by {}".format(m.group(1), m.group(3), aceid, t3["author"])
+      aurl = 'http://{}:{}/ace/manifest.m3u8?id={}'.format(Prefs['ace_host'], Prefs['ace_port'], aceid)
+      Log(aurl)
+      if re.search('\[(ar|croatian|es|esp|ger|german|kazakh|pl|portugal|pt|ru|spanish|ukrainian)\]', acedesc, re.IGNORECASE) == None:
+        lang_1.append(
+          Show(
+            url = aurl,
+            title = acedesc.decode('utf-8')
+          )
         )
-      )
-    else:
-      lang_0.append(
-        Show(
-          url = aurl,
-          title = acedesc.decode('utf-8')
+      else:
+        lang_0.append(
+          Show(
+            url = aurl,
+            title = acedesc.decode('utf-8')
+          )
         )
-      )
-    for e in lang_0:
-      oc.add(e)
-    for e in lang_1:
-      oc.add(e)
+  for e in lang_0:
+    oc.add(e)
+  for e in lang_1:
+    oc.add(e)
   return oc
 
 
@@ -181,7 +200,7 @@ def RedditNBAList(title):
       title = 'Refresh'
     )
   )
-  getRedditLinks(oc, 'https://www.reddit.com/r/nbastreams/', ' @')
+  getRedditLinks(oc, 'https://www.reddit.com/r/nbastreams.json', ' @')
   return oc
 
 @route('/video/ace/redditnfllist')
@@ -193,7 +212,7 @@ def RedditNFLList(title):
       title = 'Refresh'
     )
   )
-  getRedditLinks(oc, 'https://www.reddit.com/r/nflstreams/', ' @')
+  getRedditLinks(oc, 'https://www.reddit.com/r/nflstreams.json', ' @')
   return oc
 
 @route('/video/ace/redditmmalist')
@@ -205,7 +224,7 @@ def RedditMMAList(title):
       title = 'Refresh'
     )
   )
-  getRedditLinks(oc, 'https://www.reddit.com/r/MMAStreams/', ' vs')
+  getRedditLinks(oc, 'https://www.reddit.com/r/MMAStreams.json', ' vs')
   return oc
 
 @route('/video/ace/redditmotorsportslist')
@@ -217,7 +236,7 @@ def RedditMotorSportsList(title):
       title = 'Refresh'
     )
   )
-  getRedditLinks(oc, 'https://www.reddit.com/r/motorsportsstreams/', ' utc')
+  getRedditLinks(oc, 'https://www.reddit.com/r/motorsportsstreams.json', ' utc')
   return oc
 
 @route('/video/ace/redditsoccerlist')
@@ -229,7 +248,7 @@ def RedditSoccerList(title):
       title = 'Refresh'
     )
   )
-  getRedditLinks(oc, 'https://www.reddit.com/r/soccerstreams/', ' vs')
+  getRedditLinks(oc, 'https://www.reddit.com/r/soccerstreams.json', ' vs')
   return oc
 
 
