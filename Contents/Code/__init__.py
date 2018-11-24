@@ -69,13 +69,13 @@ def ArenavisionList(title):
   tomorrow = '{:%d/%m/%Y}'.format(datetime.utcnow() + timedelta(days=1))
   html = HTML.ElementFromURL('http://arenavision.in/guide', '', {'Cookie': 'beget=begetok; expires=' + ('{:%a, %d %b %Y %H:%M:%S GMT}'.format(datetime.utcnow() + timedelta(seconds=19360000))) + '; path=/'})
   for item in html.xpath('//tr[count(./td)>=6]'):
-    av_date = item.xpath('./td[1]/text()')[0].decode('utf-8')
+    av_date = item.xpath('./td[1]/text()')[0].decode('UTF-8')
     if today != av_date and tomorrow !=av_date:
       continue
-    av_time = item.xpath('./td[2]/text()')[0].decode('utf-8')
-    av_sport = item.xpath('./td[3]/text()')[0].decode('utf-8')
-    av_tournament = item.xpath('./td[4]/text()')[0].decode('utf-8')
-    av_match = item.xpath('./td[5]/text()')[0].decode('utf-8')
+    av_time = item.xpath('./td[2]/text()')[0].decode('UTF-8')
+    av_sport = item.xpath('./td[3]/text()')[0].decode('UTF-8')
+    av_tournament = item.xpath('./td[4]/text()')[0].decode('UTF-8')
+    av_match = item.xpath('./td[5]/text()')[0].decode('UTF-8')
     av_langs = ''
     urls = []
     for t1 in item.xpath('./td[6]/text()'):
@@ -122,19 +122,26 @@ def ArenavisionSubList(title, url):
 
 
 def getRedditLinks(oc, url, selector):
-  html = HTTP.Request(url).content
-  js = json.loads(html)
-  for t3 in js["data"]["children"]:
-    title = t3["data"]["title"]
-    if title.lower().find(selector) != -1:
-      title2 = "{}, by {}".format(title, t3["data"]["author"])
-      url2 = t3["data"]["url"]
-      oc.add(
-        DirectoryObject(
-          key = Callback(RedditSubList, title = title2, url = url2),
-          title = title2
+  plus = ""
+  while True:
+    html = HTTP.Request(url + plus).content
+    js = json.loads(html)
+    for t3 in js["data"]["children"]:
+      title = t3["data"]["title"]
+      if title.lower().find(selector) != -1:
+        title2 = "{}, by {}".format(title, t3["data"]["author"]).decode('UTF-8')
+        url2 = t3["data"]["url"].decode('UTF-8')
+        oc.add(
+          DirectoryObject(
+            key = Callback(RedditSubList, title = title2, url = url2),
+            title = title2
+          )
         )
-      )
+    after = js["data"]["after"]
+    if after is None:
+      break
+    else:
+      plus = "?after=" + after
 
 
 def findAllData(js, ks):
@@ -161,29 +168,36 @@ def RedditSubList(title, url):
   pattern = re.compile(r'((?:\[[^\[\]]+\]\s+)*)acestream:\/\/([0-z]{40})((?:\s+\[[^\[\]]+\])*)', re.IGNORECASE)
   lang_0 = []
   lang_1 = []
-  html = HTTP.Request("{}.json".format(url[:-1])).content
-  js = json.loads(html)
-  arr = findAllData(js, "data")
-  for t3 in arr:
-    for m in re.finditer(pattern, t3["body"]):
-      aceid = m.group(2)
-      acedesc = "{}{} [{}] by {}".format(m.group(1), m.group(3), aceid, t3["author"])
-      aurl = 'http://{}:{}/ace/manifest.m3u8?id={}'.format(Prefs['ace_host'], Prefs['ace_port'], aceid)
-      Log(aurl)
-      if re.search('\[(ar|croatian|es|esp|ger|german|kazakh|pl|portugal|pt|ru|spanish|ukrainian)\]', acedesc, re.IGNORECASE) == None:
-        lang_1.append(
-          Show(
-            url = aurl,
-            title = acedesc.decode('utf-8')
+  plus = ""
+  while True:
+    html = HTTP.Request(url[:-1] + ".json" + plus).content
+    js = json.loads(html)
+    arr = findAllData(js, "data")
+    for t3 in arr:
+      for m in re.finditer(pattern, t3["body"]):
+        aceid = m.group(2)
+        acedesc = "{}{} [{}] by {}".format(m.group(1), m.group(3), aceid, t3["author"])
+        aurl = 'http://{}:{}/ace/manifest.m3u8?id={}'.format(Prefs['ace_host'], Prefs['ace_port'], aceid)
+        Log(aurl)
+        if re.search('\[(ar|croatian|es|esp|ger|german|kazakh|pl|portugal|pt|ru|spanish|ukrainian)\]', acedesc, re.IGNORECASE) == None:
+          lang_1.append(
+            Show(
+              url = aurl,
+              title = acedesc.decode('UTF-8')
+            )
           )
-        )
-      else:
-        lang_0.append(
-          Show(
-            url = aurl,
-            title = acedesc.decode('utf-8')
+        else:
+          lang_0.append(
+            Show(
+              url = aurl,
+              title = acedesc.decode('UTF-8')
+            )
           )
-        )
+    after = js[0]["data"]["after"]
+    if after is None:
+      break
+    else:
+      plus = "?after=" + after
   for e in lang_0:
     oc.add(e)
   for e in lang_1:
