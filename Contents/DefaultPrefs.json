@@ -18,6 +18,12 @@
         "default":  true
     },
     {
+        "id":       "show_reddit_boxing",
+        "label":    "Load reddit boxing links",
+        "type":     "bool",
+        "default":  true
+    },
+    {
         "id":       "show_reddit_mma",
         "label":    "Load reddit mma links",
         "type":     "bool",

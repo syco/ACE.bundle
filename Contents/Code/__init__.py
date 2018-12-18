@@ -18,6 +18,13 @@ def MainMenu():
         title = 'Arenavision'
       )
     )
+  if (Prefs['show_reddit_boxing']):
+    oc.add(
+      DirectoryObject(
+        key = Callback(RedditNFLList, title = 'Reddit/Boxing'),
+        title = 'Reddit/Boxing'
+      )
+    )
   if (Prefs['show_reddit_nba']):
     oc.add(
       DirectoryObject(
@@ -204,6 +211,18 @@ def RedditSubList(title, url):
     oc.add(e)
   return oc
 
+
+@route('/video/ace/redditboxinglist')
+def RedditBoxingList(title):
+  oc = ObjectContainer(title2 = title)
+  oc.add(
+    DirectoryObject(
+      key = Callback(RedditBoxingList, title = title),
+      title = 'Refresh'
+    )
+  )
+  getRedditLinks(oc, 'https://www.reddit.com/r/boxingstreams.json', ' vs')
+  return oc
 
 @route('/video/ace/redditnbalist')
 def RedditNBAList(title):
