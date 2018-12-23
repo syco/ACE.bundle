@@ -1,7 +1,15 @@
 ## Plex plug-in that plays live streams using acestream engine ##
 
 ### Introduction ###
-A [Plex Media Servers](https://www.plex.tv/downloads) plug-in that scrapes reddit's soccerstream looking for acestream links and then populate a list understandable by plex.
+A [Plex Media Servers](https://www.plex.tv/downloads) plug-in that scrapes reddit's pages looking for acestream links and then populate a list understandable by plex.
+
+### Supported subreddits ###
+* boxingstreams
+* nbastreams
+* nflstreams
+* MMAStreams
+* motorsportsstreams
+* soccerstreams
 
 ### Requirements ###
 In order to stream content you need acestream engine on the same host listening on port 6878, I personally start the engine with options "--log-stdout --client-console"
