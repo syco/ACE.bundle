@@ -281,7 +281,7 @@ def RedditSoccerList(title):
       title = 'Refresh'
     )
   )
-  getRedditLinks(oc, 'https://www.reddit.com/r/soccerstreams.json', ' vs')
+  getRedditLinks(oc, 'https://www.reddit.com/r/soccerstreams_other.json', ' vs')
   return oc
 
 

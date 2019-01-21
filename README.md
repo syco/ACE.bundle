@@ -9,7 +9,7 @@ A [Plex Media Servers](https://www.plex.tv/downloads) plug-in that scrapes reddi
 * nflstreams
 * MMAStreams
 * motorsportsstreams
-* soccerstreams
+* soccerstreams_other
 
 ### Requirements ###
 In order to stream content you need acestream engine on the same host listening on port 6878, I personally start the engine with options "--log-stdout --client-console"
