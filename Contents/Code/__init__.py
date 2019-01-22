@@ -66,12 +66,6 @@ def MainMenu():
 @route('/video/ace/arenavisionlist')
 def ArenavisionList(title):
   oc = ObjectContainer(title2 = title)
-  oc.add(
-    DirectoryObject(
-      key = Callback(ArenavisionList, title = title),
-      title = 'Refresh'
-    )
-  )
   today = '{:%d/%m/%Y}'.format(datetime.utcnow())
   tomorrow = '{:%d/%m/%Y}'.format(datetime.utcnow() + timedelta(days=1))
   html = HTML.ElementFromURL('http://arenavision.in/guide', '', {'Cookie': 'beget=begetok; expires=' + ('{:%a, %d %b %Y %H:%M:%S GMT}'.format(datetime.utcnow() + timedelta(seconds=19360000))) + '; path=/'})
@@ -106,12 +100,6 @@ def ArenavisionList(title):
 @route('/video/ace/arenavisionsublist')
 def ArenavisionSubList(title, url):
   oc = ObjectContainer(title2 = title)
-  oc.add(
-    DirectoryObject(
-      key = Callback(ArenavisionSubList, title = title, url = url),
-      title = 'Refresh'
-    )
-  )
   pattern = re.compile(r'acestream:\/\/([0-z]{40})', re.IGNORECASE)
   for r in url.split('|'):
     t = r.split('!')
@@ -119,12 +107,10 @@ def ArenavisionSubList(title, url):
     for m in re.finditer(pattern, html):
       aurl = 'http://{}:{}/ace/manifest.m3u8?id={}'.format(Prefs['ace_host'], Prefs['ace_port'], m.group(1))
       Log(aurl)
-      oc.add(
-        Show(
-          url = aurl,
-          title = t[0]
-        )
-      )
+      oc.add(Show(
+        url = aurl,
+        title = t[0]
+      ))
   return oc
 
 
@@ -166,12 +152,6 @@ def findAllData(js, ks):
 @route('/video/ace/redditsublist')
 def RedditSubList(title, url):
   oc = ObjectContainer(title2 = title)
-  oc.add(
-    DirectoryObject(
-      key = Callback(RedditSubList, title = title, url = url),
-      title = 'Refresh'
-    )
-  )
   pattern = re.compile(r'((?:\[[^\[\]]+\]\s+)*)acestream:\/\/([0-z]{40})((?:\s+\[[^\[\]]+\])*)', re.IGNORECASE)
   lang_0 = []
   lang_1 = []
@@ -187,19 +167,15 @@ def RedditSubList(title, url):
         aurl = 'http://{}:{}/ace/manifest.m3u8?id={}'.format(Prefs['ace_host'], Prefs['ace_port'], aceid)
         Log(aurl)
         if re.search('\[(ar|croatian|es|esp|ger|german|kazakh|pl|portugal|pt|ru|spanish|ukrainian)\]', acedesc, re.IGNORECASE) == None:
-          lang_1.append(
-            Show(
-              url = aurl,
-              title = acedesc.decode('UTF-8')
-            )
-          )
+          lang_1.append(Show(
+            url = aurl,
+            title = acedesc.decode('UTF-8')
+          ))
         else:
-          lang_0.append(
-            Show(
-              url = aurl,
-              title = acedesc.decode('UTF-8')
-            )
-          )
+          lang_0.append(Show(
+            url = aurl,
+            title = acedesc.decode('UTF-8')
+          ))
     after = js[0]["data"]["after"]
     if after is None:
       break
@@ -215,72 +191,36 @@ def RedditSubList(title, url):
 @route('/video/ace/redditboxinglist')
 def RedditBoxingList(title):
   oc = ObjectContainer(title2 = title)
-  oc.add(
-    DirectoryObject(
-      key = Callback(RedditBoxingList, title = title),
-      title = 'Refresh'
-    )
-  )
   getRedditLinks(oc, 'https://www.reddit.com/r/boxingstreams.json', ' vs')
   return oc
 
 @route('/video/ace/redditnbalist')
 def RedditNBAList(title):
   oc = ObjectContainer(title2 = title)
-  oc.add(
-    DirectoryObject(
-      key = Callback(RedditNBAList, title = title),
-      title = 'Refresh'
-    )
-  )
   getRedditLinks(oc, 'https://www.reddit.com/r/nbastreams.json', ' @')
   return oc
 
 @route('/video/ace/redditnfllist')
 def RedditNFLList(title):
   oc = ObjectContainer(title2 = title)
-  oc.add(
-    DirectoryObject(
-      key = Callback(RedditNFLList, title = title),
-      title = 'Refresh'
-    )
-  )
   getRedditLinks(oc, 'https://www.reddit.com/r/nflstreams.json', ' @')
   return oc
 
 @route('/video/ace/redditmmalist')
 def RedditMMAList(title):
   oc = ObjectContainer(title2 = title)
-  oc.add(
-    DirectoryObject(
-      key = Callback(RedditMMAList, title = title),
-      title = 'Refresh'
-    )
-  )
   getRedditLinks(oc, 'https://www.reddit.com/r/MMAStreams.json', ' vs')
   return oc
 
 @route('/video/ace/redditmotorsportslist')
 def RedditMotorSportsList(title):
   oc = ObjectContainer(title2 = title)
-  oc.add(
-    DirectoryObject(
-      key = Callback(RedditMotorSportsList, title = title),
-      title = 'Refresh'
-    )
-  )
   getRedditLinks(oc, 'https://www.reddit.com/r/motorsportsstreams.json', ' utc')
   return oc
 
 @route('/video/ace/redditsoccerlist')
 def RedditSoccerList(title):
   oc = ObjectContainer(title2 = title)
-  oc.add(
-    DirectoryObject(
-      key = Callback(RedditSoccerList, title = title),
-      title = 'Refresh'
-    )
-  )
   getRedditLinks(oc, 'https://www.reddit.com/r/soccerstreams_other.json', ' vs')
   return oc
 
@@ -289,17 +229,10 @@ def RedditSoccerList(title):
 @route('/video/ace/show', include_container = bool)
 def Show(url, title, include_container = False, **kwargs):
   vco = VideoClipObject(
-    key = Callback(Show, url = url, title = title, include_container = True),
-    rating_key = url,
+    url = url,
     title = title,
     items = [
       MediaObject(
-        protocol = Protocol.HLS,
-        container = Container.MP4,
-        video_codec = VideoCodec.H264,
-        audio_codec = AudioCodec.AAC,
-        audio_channels = 2,
-        optimized_for_streaming = True,
         parts = [
           PartObject(
             key = HTTPLiveStreamURL(Callback(Play, url = url))
