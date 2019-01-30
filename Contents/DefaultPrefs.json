@@ -18,6 +18,12 @@
         "default":  true
     },
     {
+        "id":       "show_platinsport",
+        "label":    "Load platinsport links",
+        "type":     "bool",
+        "default":  true
+    },
+    {
         "id":       "show_reddit_boxing",
         "label":    "Load reddit boxing links",
         "type":     "bool",

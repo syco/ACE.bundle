@@ -18,6 +18,13 @@ def MainMenu():
         title = 'Arenavision'
       )
     )
+  if (Prefs['show_platinsport']):
+    oc.add(
+      DirectoryObject(
+        key = Callback(PlatinsportList, title = 'Platinsport'),
+        title = 'Platinsport'
+      )
+    )
   if (Prefs['show_reddit_boxing']):
     oc.add(
       DirectoryObject(
@@ -111,6 +118,38 @@ def ArenavisionSubList(title, url):
         url = aurl,
         title = t[0]
       ))
+  return oc
+
+
+@route('/video/ace/platinsportlist')
+def PlatinsportList(title):
+  oc = ObjectContainer(title2 = title)
+  html = HTML.ElementFromURL('http://www.platinsport.com/')
+  for item in html.xpath('//article[@class="item-list"]'):
+    date = (item.xpath('./h2[@class="post-box-title"]/a/text()')[0])[0:10]
+    for row in item.xpath('.//tr'):
+      title = "{} {}".format(date, row.xpath('.//td[2]/strong/text()')[0]).decode('UTF-8')
+      url = (row.xpath('.//td[3]/a')[0]).get('href').decode('UTF-8')
+      oc.add(
+        DirectoryObject(
+          key = Callback(PlatinsportSubList, title = title, url = url[20:]),
+          title = title
+        )
+      )
+  return oc
+
+@route('/video/ace/platinsportsublist')
+def PlatinsportSubList(title, url):
+  oc = ObjectContainer(title2 = title.decode('UTF-8'))
+  pattern = re.compile(r'acestream:\/\/([0-z]{40})', re.IGNORECASE)
+  html = HTTP.Request(url).content
+  for m in re.finditer(pattern, html):
+    aurl = 'http://{}:{}/ace/manifest.m3u8?id={}'.format(Prefs['ace_host'], Prefs['ace_port'], m.group(1))
+    Log(aurl)
+    oc.add(Show(
+      url = aurl.decode('UTF-8'),
+      title = title.decode('UTF-8')
+    ))
   return oc
 
 
