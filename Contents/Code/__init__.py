@@ -274,18 +274,19 @@ def RedditMotorSportsList0(title):
 @route('/video/ace/redditsoccerlist0')
 def RedditSoccerList0(title):
   oc = ObjectContainer(title2 = title)
-  oc.add(
-    DirectoryObject(
-      key = Callback(RedditList1, title = '/r/soccerstreams_other', url = 'https://www.reddit.com/r/soccerstreams_other.json', sep = ' vs'),
-      title = '/r/soccerstreams_other'
-    )
-  )
-  oc.add(
-    DirectoryObject(
-      key = Callback(RedditList1, title = '/r/soccerstreams_pl', url = 'https://www.reddit.com/r/soccerstreams_pl.json', sep = ' vs'),
-      title = '/r/soccerstreams_pl'
-    )
-  )
+  getRedditLinks(oc, 'https://www.reddit.com/r/redditsoccer.json', ' vs')
+  #oc.add(
+  #  DirectoryObject(
+  #    key = Callback(RedditList1, title = '/r/soccerstreams_other', url = 'https://www.reddit.com/r/soccerstreams_other.json', sep = ' vs'),
+  #    title = '/r/soccerstreams_other'
+  #  )
+  #)
+  #oc.add(
+  #  DirectoryObject(
+  #    key = Callback(RedditList1, title = '/r/soccerstreams_pl', url = 'https://www.reddit.com/r/soccerstreams_pl.json', sep = ' vs'),
+  #    title = '/r/soccerstreams_pl'
+  #  )
+  #)
   return oc
 
 
