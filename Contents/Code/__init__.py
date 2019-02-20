@@ -76,7 +76,7 @@ def ArenavisionList0(title):
   oc = ObjectContainer(title2 = title)
   today = '{:%d/%m/%Y}'.format(datetime.utcnow())
   tomorrow = '{:%d/%m/%Y}'.format(datetime.utcnow() + timedelta(days=1))
-  html = HTML.ElementFromURL('http://arenavision.us/guide', '', {'Cookie': 'beget=begetok; expires=' + ('{:%a, %d %b %Y %H:%M:%S GMT}'.format(datetime.utcnow() + timedelta(seconds=19360000))) + '; path=/'})
+  html = HTML.ElementFromURL('http://arenavision.in/guide', '', {'Cookie': 'beget=begetok; expires=' + ('{:%a, %d %b %Y %H:%M:%S GMT}'.format(datetime.utcnow() + timedelta(seconds=19360000))) + '; path=/'})
   for item in html.xpath('//tr[count(./td)>=6]'):
     av_date = item.xpath('./td[1]/text()')[0].decode('UTF-8')
     if today != av_date and tomorrow !=av_date:

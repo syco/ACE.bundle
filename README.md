@@ -5,7 +5,7 @@ A [Plex Media Servers](https://www.plex.tv/downloads) plug-in that scrapes acest
 
 ### Supported websites and reddit threads: ###
 
-* arenavision.us
+* arenavision.in
 * platinsport.com
 * reddit.com/r/boxingstreams
 * reddit.com/r/nbastreams
