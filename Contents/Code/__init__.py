@@ -1,6 +1,7 @@
 from datetime import datetime, timedelta
 import json
 import re
+import urllib
 
 def Start():
   ObjectContainer.title1 = 'ACE'
@@ -11,6 +12,12 @@ def Start():
 @handler('/video/ace', 'ACE', thumb = 'logo.png', art = 'logo.png')
 def MainMenu():
   oc = ObjectContainer(title2 = 'ACE')
+  oc.add(
+    DirectoryObject(
+      key = Callback(PHPScrapersList, title = 'PHP Scrapers', action = 'list', link = ''),
+      title = 'PHP Scrapers'
+    )
+  )
   if (Prefs['show_arenavision']):
     oc.add(
       DirectoryObject(
@@ -25,50 +32,33 @@ def MainMenu():
         title = 'Platinsport'
       )
     )
-  if (Prefs['show_reddit_boxing']):
-    oc.add(
-      DirectoryObject(
-        key = Callback(RedditNFLList0, title = 'Reddit/Boxing'),
-        title = 'Reddit/Boxing'
-      )
-    )
-  if (Prefs['show_reddit_nba']):
-    oc.add(
-      DirectoryObject(
-        key = Callback(RedditNBAList0, title = 'Reddit/NBA'),
-        title = 'Reddit/NBA'
-      )
-    )
-  if (Prefs['show_reddit_nfl']):
-    oc.add(
-      DirectoryObject(
-        key = Callback(RedditNFLList0, title = 'Reddit/NFL'),
-        title = 'Reddit/NFL'
-      )
-    )
-  if (Prefs['show_reddit_mma']):
-    oc.add(
-      DirectoryObject(
-        key = Callback(RedditMMAList0, title = 'Reddit/MMA'),
-        title = 'Reddit/MMA'
-      )
-    )
-  if (Prefs['show_reddit_motorsports']):
-    oc.add(
-      DirectoryObject(
-        key = Callback(RedditMotorSportsList0, title = 'Reddit/MotorSports'),
-        title = 'Reddit/MotorSports'
-      )
-    )
-  if (Prefs['show_reddit_soccer']):
-    oc.add(
-      DirectoryObject(
-        key = Callback(RedditSoccerList0, title = 'Reddit/Soccer'),
-        title = 'Reddit/Soccer'
-      )
-    )
   return oc
 
+
+
+@route('/video/ace/phpscraperslist')
+def PHPScrapersList(title, action, link):
+  oc = ObjectContainer(title2 = title)
+
+  alink = "http://syco.netsons.org/scrapers/acestream/?action={}&link={}".format(urllib.quote(action), urllib.quote(link))
+  Log(alink)
+  html = HTTP.Request(alink).content
+  phpscrapers = json.loads(html)
+  for phpscraper in phpscrapers:
+    if phpscraper['action'] == "ace":
+      oc.add(Show(
+        url = 'http://{}:{}/ace/manifest.m3u8?id={}'.format(Prefs['ace_host'], Prefs['ace_port'], phpscraper['link']),
+        title = phpscraper['title']
+      ))
+    else:
+      oc.add(
+        DirectoryObject(
+          key = Callback(PHPScrapersList, title = phpscraper['title'], action = phpscraper['action'], link = phpscraper['link']),
+          title = phpscraper['title']
+        )
+      )
+
+  return oc
 
 
 @route('/video/ace/arenavisionlist0')
@@ -152,141 +142,6 @@ def PlatinsportList1(title, url):
       url = aurl.decode('UTF-8'),
       title = title.decode('UTF-8')
     ))
-  return oc
-
-
-
-def getRedditLinks(oc, url, selector):
-  plus = ""
-  while True:
-    html = HTTP.Request(url + plus).content
-    js = json.loads(html)
-    for t3 in js["data"]["children"]:
-      title = t3["data"]["title"]
-      if title.lower().find(selector) != -1:
-        title2 = "{}, by {}".format(title, t3["data"]["author"]).decode('UTF-8')
-        url2 = t3["data"]["url"].decode('UTF-8')
-        oc.add(
-          DirectoryObject(
-            key = Callback(RedditList2, title = title2, url = url2),
-            title = title2
-          )
-        )
-    after = js["data"]["after"]
-    if after is None:
-      break
-    else:
-      plus = "?after=" + after
-
-def findAllData(js, ks):
-  arr = []
-  if isinstance(js, dict):
-    for k in js:
-      if k == ks and "body" in js[k]:
-        arr.append(js[k])
-      arr.extend(findAllData(js[k], ks))
-  elif isinstance(js, list):
-    for sjs in js:
-      arr.extend(findAllData(sjs, ks))
-  return arr
-
-@route('/video/ace/redditlist1')
-def RedditList1(title, url, sep):
-  oc = ObjectContainer(title2 = title)
-  getRedditLinks(oc, url, sep)
-  return oc
-
-@route('/video/ace/redditlist2')
-def RedditList2(title, url):
-  oc = ObjectContainer(title2 = title)
-  pattern = re.compile(r'((?:\[[^\[\]]+\]\s+)*)acestream:\/\/([0-z]{40})((?:\s+\[[^\[\]]+\])*)', re.IGNORECASE)
-  lang_0 = []
-  lang_1 = []
-  plus = ""
-  while True:
-    html = HTTP.Request(url[:-1] + ".json" + plus).content
-    js = json.loads(html)
-    arr = findAllData(js, "data")
-    for t3 in arr:
-      for m in re.finditer(pattern, t3["body"]):
-        aceid = m.group(2)
-        acedesc = "{}{} [{}] by {}".format(m.group(1), m.group(3), aceid, t3["author"])
-        aurl = 'http://{}:{}/ace/manifest.m3u8?id={}'.format(Prefs['ace_host'], Prefs['ace_port'], aceid)
-        Log(aurl)
-        if re.search('\[(ar|croatian|es|esp|ger|german|kazakh|pl|portugal|pt|ru|spanish|ukrainian)\]', acedesc, re.IGNORECASE) == None:
-          lang_1.append(Show(
-            url = aurl,
-            title = acedesc.decode('UTF-8')
-          ))
-        else:
-          lang_0.append(Show(
-            url = aurl,
-            title = acedesc.decode('UTF-8')
-          ))
-    after = js[0]["data"]["after"]
-    if after is None:
-      break
-    else:
-      plus = "?after=" + after
-  for e in lang_0:
-    oc.add(e)
-  for e in lang_1:
-    oc.add(e)
-  return oc
-
-
-
-@route('/video/ace/redditboxinglist0')
-def RedditBoxingList0(title):
-  oc = ObjectContainer(title2 = title)
-  getRedditLinks(oc, 'https://www.reddit.com/r/boxingstreams.json', ' vs')
-  return oc
-
-
-@route('/video/ace/redditnbalist0')
-def RedditNBAList0(title):
-  oc = ObjectContainer(title2 = title)
-  getRedditLinks(oc, 'https://www.reddit.com/r/nbastreams.json', ' @')
-  return oc
-
-
-@route('/video/ace/redditnfllist0')
-def RedditNFLList0(title):
-  oc = ObjectContainer(title2 = title)
-  getRedditLinks(oc, 'https://www.reddit.com/r/nflstreams.json', ' @')
-  return oc
-
-
-@route('/video/ace/redditmmalist0')
-def RedditMMAList0(title):
-  oc = ObjectContainer(title2 = title)
-  getRedditLinks(oc, 'https://www.reddit.com/r/MMAStreams.json', ' vs')
-  return oc
-
-
-@route('/video/ace/redditmotorsportslist0')
-def RedditMotorSportsList0(title):
-  oc = ObjectContainer(title2 = title)
-  getRedditLinks(oc, 'https://www.reddit.com/r/motorsportsstreams.json', ' utc')
-  return oc
-
-
-@route('/video/ace/redditsoccerlist0')
-def RedditSoccerList0(title):
-  oc = ObjectContainer(title2 = title)
-  getRedditLinks(oc, 'https://www.reddit.com/r/redditsoccer.json', ' vs')
-  #oc.add(
-  #  DirectoryObject(
-  #    key = Callback(RedditList1, title = '/r/soccerstreams_other', url = 'https://www.reddit.com/r/soccerstreams_other.json', sep = ' vs'),
-  #    title = '/r/soccerstreams_other'
-  #  )
-  #)
-  #oc.add(
-  #  DirectoryObject(
-  #    key = Callback(RedditList1, title = '/r/soccerstreams_pl', url = 'https://www.reddit.com/r/soccerstreams_pl.json', sep = ' vs'),
-  #    title = '/r/soccerstreams_pl'
-  #  )
-  #)
   return oc
 
 
