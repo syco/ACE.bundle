@@ -10,17 +10,5 @@
         "label":    "Port for the acestream application",
         "type":     "text",
         "default":  "6878"
-    },
-    {
-        "id":       "show_arenavision",
-        "label":    "Load arenavision links",
-        "type":     "bool",
-        "default":  true
-    },
-    {
-        "id":       "show_platinsport",
-        "label":    "Load platinsport links",
-        "type":     "bool",
-        "default":  true
     }
 ]
