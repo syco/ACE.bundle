@@ -10,5 +10,11 @@
         "label":    "Port for the acestream application",
         "type":     "text",
         "default":  "6878"
+    },
+    {
+        "id":       "subreddits_list",
+        "label":    "List of subreddits urls comma separated",
+        "type":     "text",
+        "default":  ""
     }
 ]

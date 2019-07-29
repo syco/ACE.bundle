@@ -26,16 +26,16 @@ def MainMenu():
   html = HTTP.Request(alink).content
   phpscrapers = json.loads(html)
   for phpscraper in phpscrapers:
-    if phpscraper['action'] == "ace":
-      oc.add(Show(
-        url = 'http://{}:{}/ace/manifest.m3u8?id={}'.format(Prefs['ace_host'], Prefs['ace_port'], phpscraper['link']),
-        title = phpscraper['title']
-      ))
-    else:
-      oc.add(DirectoryObject(
-        key = Callback(PHPScrapersList, title = phpscraper['title'], action = phpscraper['action'], link = phpscraper['link']),
-        title = phpscraper['title']
-      ))
+    oc.add(DirectoryObject(
+      key = Callback(PHPScrapersList, title = phpscraper['title'], action = phpscraper['action'], link = ''),
+      title = phpscraper['title']
+    ))
+
+  for suburl in Prefs['subreddits_list'].split(','):
+    oc.add(DirectoryObject(
+      key = Callback(PHPScrapersList, title = suburl, action = 'reddit-generic-list-0', link = suburl),
+      title = suburl
+    ))
 
   return oc
 
