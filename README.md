@@ -10,7 +10,8 @@ A [Plex Media Servers](https://www.plex.tv/downloads) plug-in that scrapes acest
 * LiveTV.sx
 * Platin Sport
 * Reddit - LiveTvLinks
-* Reddit - any subreddit in the format /r/subreddit
+* acestreamsearch.com
+* Reddit - any subreddit in the format /r/subreddit1,/r/subreddit2
 
 ### Requirements ###
 In order to stream content you need acestream engine running on the same computer or on the same network, I personally start the engine with options "--log-stdout --client-console"

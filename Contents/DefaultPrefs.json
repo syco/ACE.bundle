@@ -12,8 +12,14 @@
         "default":  "6878"
     },
     {
+        "id":       "acestreamsearch_terms",
+        "label":    "Comma separated search terms for acestreamsearch.com",
+        "type":     "text",
+        "default":  "Sky Sport,Football,Calcio"
+    },
+    {
         "id":       "subreddits_list",
-        "label":    "List of subreddits urls comma separated",
+        "label":    "Comma separated list of subreddits in the format /r/subreddit1,/r/subreddit2",
         "type":     "text",
         "default":  ""
     }

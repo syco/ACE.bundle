@@ -14,12 +14,6 @@ def Start():
 @handler('/video/ace', 'ACE', thumb = 'logo.png', art = 'logo.png')
 def MainMenu():
   oc = ObjectContainer(title2 = 'ACE')
-  #oc.add(
-  #  DirectoryObject(
-  #    key = Callback(PHPScrapersList, title = 'PHP Scrapers', action = 'list', link = ''),
-  #    title = 'PHP Scrapers'
-  #  )
-  #)
 
   alink = "http://syco.netsons.org/scrapers/acestream/?action=&link="
   Log(alink)
@@ -35,6 +29,12 @@ def MainMenu():
     oc.add(DirectoryObject(
       key = Callback(PHPScrapersList, title = suburl, action = 'reddit-generic-list-0', link = suburl),
       title = suburl
+    ))
+
+  for tmp in Prefs['acestreamsearch_terms'].split(","):
+    oc.add(DirectoryObject(
+      key = Callback(PHPScrapersList, title = 'ASS '.format(tmp), action = 'acestreamsearch-search-0', link = tmp),
+      title = 'ASS {}'.format(tmp)
     ))
 
   return oc
