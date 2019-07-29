@@ -25,16 +25,16 @@ def MainMenu():
       title = phpscraper['title']
     ))
 
-  for suburl in Prefs['subreddits_list'].split(','):
+  for tmp in Prefs['acestreamsearch_terms'].split(','):
     oc.add(DirectoryObject(
-      key = Callback(PHPScrapersList, title = suburl, action = 'reddit-generic-list-0', link = suburl),
-      title = suburl
+      key = Callback(PHPScrapersList, title = 'ASS {}'.format(tmp), action = 'acestreamsearch-search-0', link = tmp),
+      title = 'ASS {}'.format(tmp)
     ))
 
-  for tmp in Prefs['acestreamsearch_terms'].split(","):
+  for tmp in Prefs['subreddits_list'].split(','):
     oc.add(DirectoryObject(
-      key = Callback(PHPScrapersList, title = 'ASS '.format(tmp), action = 'acestreamsearch-search-0', link = tmp),
-      title = 'ASS {}'.format(tmp)
+      key = Callback(PHPScrapersList, title = 'Reddit {}'.format(tmp), action = 'reddit-generic-list-0', link = tmp),
+      title = 'Reddit {}'.format(tmp)
     ))
 
   return oc
